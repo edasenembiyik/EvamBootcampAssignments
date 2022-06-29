@@ -1,0 +1,122 @@
+import java.io.*;
+import java.util.*;
+
+
+public class Solution {
+// Scanner and Priorities object were created below.
+
+    private final static Scanner scan = new Scanner(System.in);
+    private final static Priorities priorities = new Priorities();
+
+    //Taking number of events from users with Scanner
+
+    public static void main(String[] args) {
+        int totalEvents = Integer.parseInt(scan.nextLine());
+
+        //Creating new event ArrayList
+
+        List<String> events = new ArrayList<>();
+
+
+        while (totalEvents-- != 0) {
+            String event = scan.nextLine();
+            events.add(event);
+        }
+
+
+        List<Student> students = priorities.getStudents(events);
+
+        if (students.isEmpty()) {
+            System.out.println("EMPTY");
+        } else {
+            for (Student st : students) {
+                System.out.println(st.getName());
+            }
+        }
+    }
+
+// Student class and getter-setter and constructure method.
+
+static class Student {
+    int id;
+    String name;
+    Double cgpa;
+
+    public Student(int id, String name, Double cgpa) {
+        this.id = id;
+        this.name = name;
+        this.cgpa = cgpa;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getCgpa() {
+        return cgpa;
+    }
+}
+
+
+    /**My comparator class is below. Also we can use below smallest code for comparator class.
+     *          private final Comparator<Student> studentComparator = Comparator.comparing(Student::getCGPA).reversed()
+     *         .thenComparing(Student::getName)
+     *         .thenComparing(Student::getID);
+     */
+
+
+// If cgpa values are equal; we can check the first names.
+// If firstnames are equal; we can check the id numbers.
+// we write a 3 return value. If one of them are worked, java doesnt check the other results.
+static class StudentComparator implements Comparator<Student> {
+    @Override
+    public int compare(Student o1, Student o2) {
+        if (o1.getCgpa() == o2.getCgpa()) {
+            if(o1.getName().equals(o2.getName())) {
+                return Integer.compare(o2.getId(), o1.getId());
+            } else {
+                return o1.getName().compareTo(o2.getName());
+            }
+        }
+        return Double.compare(o2.getCgpa(), o1.getCgpa());
+    }
+}
+
+// Priorities class were created
+
+static class Priorities {
+    public List<Student> getStudents(List<String> events) {
+        PriorityQueue pq = new PriorityQueue<>(events.size(), new StudentComparator());
+
+        for (String event: events) {
+            String parts[] = event.split(" ");
+
+            // if users gave us -ENTER , we use .add() method
+
+            if (parts[0].equals("ENTER")) {
+                Student stu = new Student(Integer.parseInt(parts[3]), parts[1], Double.parseDouble(parts[2]));
+                pq.add(stu);
+
+                // if users gave us -SERVED , we use .pool() method
+            } else {
+                if (!pq.isEmpty()) {
+                    pq.poll();
+                }
+            }
+        }
+
+        List<Student> students = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            students.add((Student) pq.poll());
+        }
+
+        return students;
+    }
+}
+
+
+}
